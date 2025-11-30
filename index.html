@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better Life</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Landing Page -->
+    <section id="landing-page" class="active-page">
+        <div class="center-content">
+            <h1>Do you want to make your life better?</h1>
+            <div class="button-group">
+                <button id="btn-yes">Yes</button>
+                <button id="btn-no">No</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timer Page -->
+    <section id="timer-page" class="hidden-page">
+        <div class="center-content">
+            <h2 id="timer-instruction">Spend <span id="timer-display">10:00</span> minutes making your life better.</h2>
+            
+            <div id="timer-controls">
+                <button id="btn-start-timer">Start timer</button>
+                <button id="btn-help-icon" class="icon-btn" title="Help">?</button>
+            </div>
+
+            <div id="help-content" class="hidden">
+                <p>Nobody knows how to make your life better better than you.</p>
+                <p>If you aren't sure where to start, writing about it for 10 minutes goes a long way.</p>
+                <button id="btn-reveal-journal">Reveal Journal</button>
+            </div>
+
+            <div id="journal-tab" class="hidden">
+                <textarea id="journal-entry" placeholder="Write here..."></textarea>
+            </div>
+        </div>
+    </section>
+
+    <!-- Finish Page -->
+    <section id="finish-page" class="hidden-page">
+        <div class="center-content">
+            <h1>Good job, come back again tomorrow.</h1>
+            
+            <div class="menu-buttons">
+                <button id="btn-questions">Questions</button>
+                <button id="btn-how-it-works">How does this work?</button>
+                <button id="btn-advice">Advice?</button>
+                <button id="btn-leaderboard">(Unlock) Leaderboard</button>
+                <button id="btn-feedback">Feedback?</button>
+                <button id="btn-settings">Settings</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals / Overlays -->
+    <div id="modal-overlay" class="hidden">
+        <div id="modal-content">
+            <span id="close-modal" class="close-btn">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
