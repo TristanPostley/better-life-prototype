@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Better Life</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+
+    <!-- Debug Controls -->
+    <div id="debug-controls" class="hidden">
+        <button id="btn-debug">DEBUG</button>
+        <button id="btn-debug-finish">FINISH</button>
+        <input type="number" id="debug-minutes" value="1" min="1" placeholder="mins">
+    </div>
 
     <!-- Landing Page -->
     <section id="landing-page" class="active-page">
@@ -22,20 +31,35 @@
     <!-- Timer Page -->
     <section id="timer-page" class="hidden-page">
         <div class="center-content">
-            <h2 id="timer-instruction">Spend <span id="timer-display">10:00</span> minutes making your life better.</h2>
-            
-            <div id="timer-controls">
-                <button id="btn-start-timer">Start timer</button>
-                <button id="btn-help-icon" class="icon-btn" title="Help">?</button>
+            <div id="timer-intro">
+                <h2 id="timer-instruction">Spend <span id="timer-display">10:00</span> minutes making your life better.
+                </h2>
+                <div id="timer-controls">
+                    <button id="btn-start-timer">Start timer</button>
+                </div>
             </div>
 
+            <!-- Circular Timer -->
+            <div id="circle-timer" class="hidden">
+                <div class="circle-wrapper">
+                    <svg class="progress-ring" width="280" height="280">
+                        <circle class="progress-ring-bg" cx="140" cy="140" r="130" />
+                        <circle class="progress-ring-circle" cx="140" cy="140" r="130" />
+                    </svg>
+                    <div id="circle-time">10:00</div>
+                </div>
+            </div>
+
+            <button id="btn-help-icon" class="icon-btn" title="Help">?</button>
+
             <div id="help-content" class="hidden">
-                <p>Nobody knows how to make your life better better than you.</p>
-                <p>If you aren't sure where to start, writing about it for 10 minutes goes a long way.</p>
-                <button id="btn-reveal-journal">Reveal Journal</button>
+                <p>You are the expert on how to make your life better.</p>
+                <p>If you aren't sure where to start, writing about it goes a long way.</p>
+                <!-- <button id="btn-reveal-journal">Reveal Journal</button> -->
             </div>
 
             <div id="journal-tab" class="hidden">
+                <!-- <p>How could you make your life better?</p> -->
                 <textarea id="journal-entry" placeholder="Write here..."></textarea>
             </div>
         </div>
@@ -43,18 +67,52 @@
 
     <!-- Finish Page -->
     <section id="finish-page" class="hidden-page">
-        <div class="center-content">
-            <h1>Good job, come back again tomorrow.</h1>
-            
-            <div class="menu-buttons">
-                <button id="btn-questions">Questions</button>
-                <button id="btn-how-it-works">How does this work?</button>
-                <button id="btn-advice">Advice?</button>
-                <button id="btn-leaderboard">(Unlock) Leaderboard</button>
-                <button id="btn-feedback">Feedback?</button>
-                <button id="btn-settings">Settings</button>
+        <div id="finish-content">
+            <h1 class="finish-title">Good job, come back again tomorrow.</h1>
+
+            <div class="floating-buttons">
+                <button id="btn-questions" class="float-btn float-1">Questions</button>
+                <button id="btn-feedback" class="float-btn float-3">Feedback</button>
+                <button id="btn-settings" class="float-btn float-4">Settings</button>
             </div>
         </div>
+
+        <div id="questions-flow" class="hidden">
+            <div class="question-item q1 clickable" id="q-how-it-works">How does this work?</div>
+            <div class="question-item q2 clickable" id="q-better-today">How did you make your life better today?</div>
+            <div class="question-item q3 clickable" id="q-better-life-meaning">What does a better life mean to you?
+            </div>
+            <div class="question-item q4 clickable" id="q-advice">Looking for advice?</div>
+        </div>
+
+        <div id="better-today-flow" class="hidden">
+            <input type="text" id="better-today-input" class="borderless-input" placeholder="Write here...">
+        </div>
+
+        <div id="better-life-meaning-flow" class="hidden">
+            <input type="text" id="better-life-meaning-input" class="borderless-input" placeholder="Write here...">
+        </div>
+
+        <div id="how-it-works-flow" class="hidden">
+            <div class="explain-item e1">Every day that you complete a focus session on Better Life, the timer will
+                increase by 10 minutes.</div>
+            <div class="explain-item e2">If you miss a day, the number will drop by 10 minutes. The minimum is 10
+                minutes.</div>
+            <div class="explain-item e3">How high can you get the number?</div>
+        </div>
+
+        <div id="advice-flow" class="hidden">
+            <div class="advice-item">Active not Passive</div>
+            <div class="advice-item">Journal</div>
+            <div class="advice-item">Exercise</div>
+            <div class="advice-item">Meditation</div>
+            <div class="advice-item">Planning</div>
+            <div class="advice-item">Writing</div>
+            <div class="advice-item">Drawing</div>
+            <div class="advice-item">Music</div>
+        </div>
+
+        <button id="btn-finish-home" class="home-btn" title="Home">⌂</button>
     </section>
 
     <!-- Modals / Overlays -->
@@ -65,6 +123,8 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="supabase-config.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
+
 </html>

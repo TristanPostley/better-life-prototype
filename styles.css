@@ -13,17 +13,49 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
+}
+
+body.scrollable {
+    overflow-y: auto;
+    align-items: flex-start;
+    /* Hide scrollbar completely */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+body.scrollable::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .center-content {
     text-align: center;
     max-width: 600px;
+    width: 100%;
     padding: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
-h1, h2 {
+body.scrollable .center-content {
+    justify-content: flex-start;
+    padding-top: 100px;
+    padding-bottom: 40px;
+    min-height: auto;
+}
+
+h1,
+h2 {
     font-weight: normal;
     margin-bottom: 2rem;
 }
@@ -51,21 +83,105 @@ button:hover {
     padding: 0;
     line-height: 30px;
     text-align: center;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.icon-btn.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out;
 }
 
 /* Page Visibility */
+section {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.scrollable section {
+    align-items: flex-start;
+}
+
 .hidden-page {
-    display: none;
+    display: none !important;
 }
 
 .active-page {
-    display: block;
+    display: flex;
     animation: fadeIn 0.5s;
 }
 
+/* Prevent page animation from showing finish page buttons */
+#finish-page.active-page .float-btn:not(.fade-in) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Landing Page Animations */
+#landing-page h1 {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.8s ease-out forwards;
+}
+
+#landing-page .button-group {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.8s ease-out 0.3s forwards;
+}
+
+@keyframes fadeSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Timer Page Animations */
+#timer-page h2 {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.8s ease-out forwards;
+}
+
+#timer-page #timer-controls {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.8s ease-out 0.3s forwards;
+}
+
+#timer-page .icon-btn {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 0.6s forwards;
+}
+
+/* General fade transitions */
+.fade-out {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out;
+}
+
+.fade-in {
+    animation: fadeSlideIn 0.8s ease-out forwards;
 }
 
 /* Timer Page Specifics */
@@ -73,36 +189,458 @@ button:hover {
     font-weight: bold;
 }
 
+#timer-instruction {
+    white-space: nowrap;
+}
+
+/* Timer Intro (fades out) */
+#timer-intro {
+    opacity: 1;
+    transition: opacity 1.5s ease-out;
+}
+
+#timer-intro.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Circular Timer */
+#circle-timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1.5s ease-in 1.5s;
+}
+
+#circle-timer.show {
+    opacity: 1;
+}
+
+#circle-timer.hidden {
+    display: none !important;
+}
+
+.circle-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.circle-wrapper:hover .progress-ring-circle {
+    stroke-width: 10;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 8;
+}
+
+.progress-ring-circle {
+    fill: none;
+    stroke: var(--text-color);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 816.81;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+#circle-time {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+}
+
 #help-content {
-    margin-top: 20px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
     border-top: 1px solid #ccc;
     padding-top: 10px;
+    margin-top: 40px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s;
+    display: block !important;
+}
+
+#help-content:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 #journal-tab {
+    width: 90%;
+    max-width: 600px;
     margin-top: 20px;
-    width: 100%;
+    margin-bottom: 60px;
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+#journal-tab.show {
+    opacity: 1;
 }
 
 #journal-entry {
     width: 100%;
-    height: 150px;
+    min-height: 150px;
     padding: 10px;
-    border: 1px solid var(--text-color);
+    border: none;
+    background: transparent;
+    color: var(--text-color);
     font-family: var(--font-family);
+    font-size: 1rem;
     resize: none;
+    outline: none;
+    text-align: center;
+    overflow: hidden;
 }
 
-/* Menu Buttons */
-.menu-buttons {
+#journal-entry::placeholder {
+    text-align: center;
+}
+
+/* Finish Page */
+#finish-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: opacity 1s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#finish-content.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Ensure buttons are hidden on finish page until fade-in */
+#finish-page.active-page .float-btn:not(.fade-in) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+.finish-title {
+    position: relative;
+    text-align: center;
+    width: 90%;
+    z-index: 1;
+    opacity: 0;
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0 auto !important;
+    transition: opacity 0.8s ease-out;
+}
+
+.finish-title.fade-in {
+    opacity: 1;
+    animation: none !important;
+}
+
+.finish-title.fade-out {
+    opacity: 0;
+    animation: none !important;
+}
+
+.floating-buttons {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.float-btn {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 15px;
+    line-height: 1.2;
+    cursor: grab;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    /* Remove transition from here to prevent immediate visibility on reset */
+    transition: none;
+}
+
+/* Only show buttons when fade-in class is added */
+.float-btn.fade-in {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    /* Apply transition only when fading in */
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out, box-shadow 0.1s ease;
+    animation: none !important;
+}
+
+.float-btn:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.float-btn.dragging {
+    cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: none !important;
+}
+
+/* Questions Flow */
+#questions-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 3rem;
 }
 
-.menu-buttons button {
-    width: 200px;
+#questions-flow.hidden {
+    display: none !important;
+}
+
+.question-item {
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.question-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.question-item.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+}
+
+.question-item.clickable:hover {
+    text-decoration-color: var(--text-color);
+    transition: text-decoration-color 0.3s ease;
+}
+
+#questions-flow.fade-others .question-item:not(.keep-visible) {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+#questions-flow.fade-out .question-item {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.question-item.slide-to-top {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 1s ease-out, opacity 1s ease-out;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.question-item.at-top {
+    top: 15% !important;
+}
+
+/* How It Works Flow */
+#how-it-works-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+#how-it-works-flow.hidden {
+    display: none !important;
+}
+
+.explain-item {
+    font-size: 1.3rem;
+    font-weight: 300;
+    text-align: center;
+    max-width: 600px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.explain-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Better Today Flow */
+#better-today-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+#better-today-flow.hidden {
+    display: none !important;
+}
+
+/* Better Life Meaning Flow */
+#better-life-meaning-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+#better-life-meaning-flow.hidden {
+    display: none !important;
+}
+
+.borderless-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 300;
+    font-family: var(--font-family);
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.borderless-input::placeholder {
+    color: #999;
+}
+
+/* Advice Flow */
+#advice-flow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+#advice-flow.hidden {
+    display: none !important;
+}
+
+.advice-item {
+    font-size: 1.3rem;
+    font-weight: 300;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.advice-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.borderless-input.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Home Button */
+.home-btn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 0;
+    font-size: 2.4rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: transparent;
+    border: none;
+    color: transparent;
+    cursor: pointer;
 }
 
 /* Modal */
@@ -140,4 +678,335 @@ button:hover {
 
 .hidden {
     display: none !important;
+}
+
+/* Debug Controls */
+#debug-controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#debug-minutes {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* ============ AUTHENTICATION STYLES ============ */
+
+/* Auth Section */
+.auth-section {
+    margin: 2rem 0;
+}
+
+.auth-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.auth-button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+/* Auth Buttons */
+.auth-btn {
+    background: none;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+}
+
+.auth-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.auth-btn.primary {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.auth-btn.primary:hover {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.auth-btn.secondary {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.auth-btn.secondary:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.auth-btn.full-width {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* OAuth Buttons */
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.oauth-btn:hover {
+    border-color: var(--text-color);
+    background-color: #f9f9f9;
+}
+
+.oauth-btn .oauth-icon {
+    font-weight: bold;
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+.oauth-btn.google {
+    border-color: #4285f4;
+}
+
+.oauth-btn.google:hover {
+    background-color: #4285f4;
+    color: white;
+}
+
+.oauth-btn.apple {
+    border-color: #000;
+}
+
+.oauth-btn.apple:hover {
+    background-color: #000;
+    color: white;
+}
+
+.oauth-btn.facebook {
+    border-color: #1877f2;
+}
+
+.oauth-btn.facebook:hover {
+    background-color: #1877f2;
+    color: white;
+}
+
+/* Auth Divider */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.auth-divider span {
+    padding: 0 1rem;
+}
+
+/* Auth Forms */
+.auth-form {
+    margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.auth-form.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.auth-form h3 {
+    margin-bottom: 1.5rem;
+    font-weight: normal;
+}
+
+/* Auth Section Transitions */
+.auth-section {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.auth-section.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.auth-input:focus {
+    border-color: var(--text-color);
+}
+
+.auth-input::placeholder {
+    color: #999;
+}
+
+/* Auth Links */
+.auth-links {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.auth-links a {
+    color: var(--text-color);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.auth-links a:hover {
+    text-decoration: none;
+}
+
+.auth-links .divider {
+    margin: 0 0.5rem;
+    color: #999;
+}
+
+/* Auth Messages */
+.auth-message {
+    margin-top: 1rem;
+    padding: 12px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+    animation: fadeSlideIn 0.3s ease-out forwards;
+}
+
+.auth-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.auth-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Account Card (Authenticated State) */
+.account-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    margin-top: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.account-info {
+    flex: 1;
+    text-align: left;
+    min-width: 200px;
+}
+
+.account-email {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.account-meta {
+    color: #666;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+/* Settings Divider */
+.settings-divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #ddd;
+}
+
+/* Loading State */
+.auth-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-btn:disabled:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .auth-button-group {
+        flex-direction: column;
+    }
+
+    .account-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .account-info {
+        text-align: center;
+    }
+
+    #modal-content {
+        padding: 30px 20px;
+    }
 }
