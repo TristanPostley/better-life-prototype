@@ -9,15 +9,15 @@ graph TD
     Landing[Landing Page] -->|Yes| Timer[Timer Page]
     Landing -->|No| Exit[Alert / Reload]
     
-    Timer -->|Timer End| Finish[Finish Page]
+    Timer -->|Timer End| Menu[Menu Page]
     
     subgraph Modals
-        Finish -->|Click| Questions
-        Finish -->|Click| HowItWorks[How It Works]
-        Finish -->|Click| Advice
-        Finish -->|Click| Leaderboard
-        Finish -->|Click| Feedback
-        Finish -->|Click| Settings
+        Menu -->|Click| Questions
+        Menu -->|Click| HowItWorks[How It Works]
+        Menu -->|Click| Advice
+        Menu -->|Click| Leaderboard
+        Menu -->|Click| Feedback
+        Menu -->|Click| Settings
     end
 ```
 
@@ -41,10 +41,10 @@ graph TD
 *   `#help-content` (Div): Contains advice text and `#btn-reveal-journal`.
 *   `#journal-tab` (Div): Hidden by default. Contains `#journal-entry` textarea.
 **Transitions:**
-*   **Automatic**: When timer reaches 00:00 -> **Finish Page**.
+*   **Automatic**: When timer reaches 00:00 -> **Menu Page**.
 
-### 3. Finish Page
-**ID:** `#finish-page`
+### 3. Menu Page
+**ID:** `#menu-page`
 **Purpose:** Post-session summary and options.
 **Elements:**
 *   `h1`: "Good job, come back again tomorrow."

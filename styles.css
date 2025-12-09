@@ -2,6 +2,17 @@
     --bg-color: #ffffff;
     --text-color: #000000;
     --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    
+    /* Transition duration constants */
+    --transition-fast: 200ms;
+    --transition-normal: 400ms;
+    --transition-slow: 500ms;
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+    --bg-color: #000000;
+    --text-color: #ffffff;
 }
 
 body {
@@ -92,7 +103,7 @@ button:hover {
 .icon-btn.fade-out {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s ease-out;
+    transition: opacity var(--transition-normal) ease-out;
 }
 
 /* Page Visibility */
@@ -114,12 +125,12 @@ body.scrollable section {
 }
 
 .active-page {
-    display: flex;
-    animation: fadeIn 0.5s;
+    display: flex !important;
+    animation: fadeIn var(--transition-normal);
 }
 
-/* Prevent page animation from showing finish page buttons */
-#finish-page.active-page .float-btn:not(.fade-in) {
+/* Prevent page animation from showing menu page buttons */
+#menu-page.active-page .float-btn:not(.fade-in) {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -156,28 +167,59 @@ body.scrollable section {
 }
 
 /* Timer Page Animations */
-#timer-page h2 {
+/* Hide elements when page is not active */
+#timer-page:not(.active-page) h2,
+#timer-page:not(.active-page) #timer-controls,
+#timer-page:not(.active-page) .icon-btn {
     opacity: 0;
-    transform: translateY(20px);
-    animation: fadeSlideIn 0.8s ease-out forwards;
+    visibility: hidden;
 }
 
-#timer-page #timer-controls {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeSlideIn 0.8s ease-out 0.3s forwards;
+/* Show elements when page is active - make them visible immediately */
+#timer-page.active-page h2,
+#timer-page.active-page #timer-controls,
+#timer-page.active-page .icon-btn {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    /* Disable animations temporarily to ensure visibility */
+    animation: none !important;
 }
 
-#timer-page .icon-btn {
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.6s forwards;
+/* Timer-specific animations to ensure they restart */
+/* Start from visible state - animation just adds visual polish */
+@keyframes timerFadeSlideIn {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes timerFadeIn {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 /* General fade transitions */
 .fade-out {
     opacity: 0 !important;
     pointer-events: none;
-    transition: opacity 0.5s ease-out;
+    transition: opacity var(--transition-normal) ease-out;
 }
 
 .fade-in {
@@ -196,26 +238,51 @@ body.scrollable section {
 /* Timer Intro (fades out) */
 #timer-intro {
     opacity: 1;
-    transition: opacity 1.5s ease-out;
+    transition: opacity var(--transition-slow) ease-out;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+    visibility: visible;
+    display: block;
+}
+
+/* Ensure timer-intro is visible when page is active */
+#timer-page.active-page #timer-intro {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+#timer-page.active-page #timer-intro.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 #timer-intro.fade-out {
     opacity: 0;
     pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 /* Circular Timer */
 #circle-timer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin: 40px auto 60px auto;
     opacity: 0;
-    transition: opacity 1.5s ease-in 1.5s;
+    transition: opacity var(--transition-slow) ease-in var(--transition-slow);
+    z-index: 1;
+    min-height: 280px;
 }
 
 #circle-timer.show {
@@ -275,11 +342,15 @@ body.scrollable section {
     border-top: 1px solid #ccc;
     padding-top: 10px;
     margin-top: 40px;
+    margin-bottom: 20px;
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s;
+    transition: opacity var(--transition-normal) ease-out, transform var(--transition-normal) ease-out, visibility var(--transition-normal);
     display: block !important;
+    position: relative;
+    z-index: 2;
+    clear: both;
 }
 
 #help-content:not(.hidden) {
@@ -294,7 +365,9 @@ body.scrollable section {
     margin-top: 20px;
     margin-bottom: 60px;
     opacity: 0;
-    transition: opacity 1s ease-in;
+    transition: opacity var(--transition-slow) ease-in;
+    position: relative;
+    z-index: 1;
 }
 
 #journal-tab.show {
@@ -320,34 +393,34 @@ body.scrollable section {
     text-align: center;
 }
 
-/* Finish Page */
-#finish-content {
+/* Menu Page */
+#menu-content {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     opacity: 1;
-    transition: opacity 1s ease-out;
+    transition: opacity var(--transition-normal) ease-out;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#finish-content.fade-out {
+#menu-content.fade-out {
     opacity: 0;
     pointer-events: none;
 }
 
-/* Ensure buttons are hidden on finish page until fade-in */
-#finish-page.active-page .float-btn:not(.fade-in) {
+/* Ensure buttons are hidden on menu page until fade-in */
+#menu-page.active-page .float-btn:not(.fade-in) {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
     transition: none !important;
 }
 
-.finish-title {
+.menu-title {
     position: relative;
     text-align: center;
     width: 90%;
@@ -357,15 +430,15 @@ body.scrollable section {
     left: auto !important;
     top: auto !important;
     margin: 0 auto !important;
-    transition: opacity 0.8s ease-out;
+    transition: opacity var(--transition-normal) ease-out;
 }
 
-.finish-title.fade-in {
+.menu-title.fade-in {
     opacity: 1;
     animation: none !important;
 }
 
-.finish-title.fade-out {
+.menu-title.fade-out {
     opacity: 0;
     animation: none !important;
 }
@@ -408,7 +481,7 @@ body.scrollable section {
     pointer-events: auto;
     transform: translateY(0);
     /* Apply transition only when fading in */
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out, box-shadow 0.1s ease;
+    transition: opacity var(--transition-normal) ease-out, transform var(--transition-normal) ease-out, box-shadow var(--transition-fast) ease;
     animation: none !important;
 }
 
@@ -424,6 +497,20 @@ body.scrollable section {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     transition: none !important;
+}
+
+/* Triangle */
+.menu-triangle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--text-color);
+    pointer-events: none;
+    z-index: 10;
+    transform-origin: center center;
+    transition: transform 0.1s ease-out;
 }
 
 /* Questions Flow */
@@ -449,7 +536,7 @@ body.scrollable section {
     font-weight: 300;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
+    transition: opacity var(--transition-slow) ease-out, transform var(--transition-slow) ease-out;
 }
 
 .question-item.show {
@@ -482,7 +569,7 @@ body.scrollable section {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    transition: top 1s ease-out, opacity 1s ease-out;
+    transition: top var(--transition-slow) ease-out, opacity var(--transition-slow) ease-out;
     z-index: 10;
     white-space: nowrap;
 }
@@ -518,7 +605,7 @@ body.scrollable section {
     max-width: 600px;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
+    transition: opacity var(--transition-slow) ease-out, transform var(--transition-slow) ease-out;
 }
 
 .explain-item.show {
@@ -578,7 +665,7 @@ body.scrollable section {
     padding: 20px;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
+    transition: opacity var(--transition-slow) ease-out, transform var(--transition-slow) ease-out;
 }
 
 .borderless-input::placeholder {
@@ -610,7 +697,7 @@ body.scrollable section {
     font-weight: 300;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    transition: opacity var(--transition-normal) ease-out, transform var(--transition-normal) ease-out;
 }
 
 .advice-item.show {
@@ -657,15 +744,62 @@ body.scrollable section {
     z-index: 1000;
 }
 
+body.dark-mode #modal-overlay {
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
 #modal-content {
-    background: white;
+    background: var(--bg-color);
     padding: 40px;
-    border: 1px solid black;
+    /* border: 1px solid black; Removed as per request */
     position: relative;
     max-width: 500px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+}
+
+.feedback-textarea {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    background: transparent;
+    color: var(--text-color);
+    text-align: center;
+}
+
+.feedback-textarea::placeholder {
+    color: #999;
+    text-align: center;
+}
+
+/* Fade in elements */
+.fade-in-element {
+    opacity: 0;
+    /* Ensure it doesn't block clicks while hidden, though opacity 0 usually allows clicks, 
+       pointer-events: none might be safer until shown, but let's keep it simple first. */
+}
+
+.fade-in-element.show {
+    animation: fadeInUp var(--transition-normal) ease-out both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .close-btn {
@@ -853,7 +987,7 @@ body.scrollable section {
     margin-top: 2rem;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition: opacity var(--transition-normal) ease-out, transform var(--transition-normal) ease-out;
 }
 
 .auth-form.show {
@@ -868,8 +1002,7 @@ body.scrollable section {
 
 /* Auth Section Transitions */
 .auth-section {
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
+    transition: opacity var(--transition-normal) ease-out;
 }
 
 .auth-section.fade-out {
@@ -1009,4 +1142,87 @@ body.scrollable section {
     #modal-content {
         padding: 30px 20px;
     }
+}
+
+/* Dark Mode Toggle Switch */
+.dark-mode-toggle {
+    margin: 1.5rem 0;
+}
+
+.dark-mode-toggle label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dark-mode-toggle input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background-color: #ccc;
+    border-radius: 13px;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
+
+.dark-mode-toggle input[type="checkbox"]:checked+.toggle-slider {
+    background-color: var(--text-color);
+}
+
+.dark-mode-toggle input[type="checkbox"]:checked+.toggle-slider::before {
+    transform: translateX(24px);
+}
+
+/* Font Selector */
+.font-selector {
+    margin: 1.5rem 0;
+}
+
+.font-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.font-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.font-select:focus {
+    border-color: var(--text-color);
+}
+
+.font-select option {
+    background: var(--bg-color);
+    color: var(--text-color);
+    /* Allow inline styles to override for font-family */
+    font-family: inherit;
 }

@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+
+# Always On Rules for Better Life Project
+
+• **Follow existing domain structure and invariants**: Code organized by domain in `src/client/domains/`. Each domain has `index.js` public API. Respect invariants from `ARCHITECTURE.md` (DOM access via `getDOMElements()`, state via `getState()`/`setState()`, errors via `handleError()`, etc.).
+
+• **Match patterns from similar files before writing code**: Examine similar existing files in the same domain. Match import patterns, export style, naming (kebab-case), error handling, and initialization patterns.
+
+• **Verify imports against the repo, do not invent helpers**: Before using any import, verify the file/function exists using `grep` or `codebase_search`. Check exports match and paths are correct. Never assume helper functions exist.
+
+• **Keep client/server/shared boundaries intact**: Client (`src/client/`) cannot import server (`src/server/`). Shared (`src/shared/`) cannot import client or server. Check `conventions/client-server-boundaries.md` when in doubt.
+
+• **Modify only what is necessary; avoid rewriting whole files**: Make minimal, targeted changes. Preserve existing structure. Don't refactor unrelated code unless explicitly requested.
+
+• **Show the list of files affected before making changes**: List all files to be created, modified, or deleted with brief descriptions before making any code changes.

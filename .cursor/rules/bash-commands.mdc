@@ -1,0 +1,13 @@
+---
+description: Bash command formatting rules to prevent errors on Windows
+globs: 
+alwaysApply: true
+---
+# Bash Command Rules
+
+**NEVER use `&&` or `;` to chain commands.** Each command must be on its own line due to Windows PowerShell compatibility.
+
+❌ `cd backend && npm install`  
+✅ `cd backend` then `npm install`
+
+Exception: Pipes (`|`) are allowed as they're a single command.

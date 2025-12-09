@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>State Manager Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+        .pass { background: #d4edda; border-left: 4px solid #28a745; }
+        .fail { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .warning h3 { margin-top: 0; }
+        .code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        .instructions { background: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>State Manager Test Suite</h1>
+    
+    <div id="cors-warning" class="warning" style="display: none;">
+        <h3>⚠️ CORS Error Detected</h3>
+        <p>This test requires a local web server due to browser security restrictions.</p>
+        <p><strong>To run this test:</strong></p>
+        <ol>
+            <li>Open a terminal in the project root directory</li>
+            <li>Run one of these commands:
+                <ul>
+                    <li>Python: <span class="code">python -m http.server 8000</span></li>
+                    <li>Node.js: <span class="code">npx http-server -p 8000</span></li>
+                    <li>PHP: <span class="code">php -S localhost:8000</span></li>
+                </ul>
+            </li>
+            <li>Open <span class="code">http://localhost:8000/tests/state-manager-test.html</span> in your browser</li>
+        </ol>
+        <p><strong>Alternative:</strong> Open the main application and run tests in the browser console (see instructions below).</p>
+    </div>
+    
+    <div class="instructions" id="console-instructions" style="display: none;">
+        <h3>💡 Test from Browser Console</h3>
+        <p>Since the state manager is already loaded in the main application, you can test it directly:</p>
+        <ol>
+            <li>Open <span class="code">index.html</span> in your browser (via a server)</li>
+            <li>Open the browser console (F12)</li>
+            <li>Run these commands:</li>
+        </ol>
+        <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;"><code>const { getState, setState, setTimerDuration } = await import('./src/client/state/app-state.js');
+console.log('Timer Duration:', getState('timerDuration'));
+setState('darkMode', true);
+console.log('Dark Mode:', getState('darkMode'));</code></pre>
+    </div>
+    
+    <div id="results"></div>
+    <script type="module">
+        // Check if we're running from file:// protocol
+        if (window.location.protocol === 'file:') {
+            document.getElementById('cors-warning').style.display = 'block';
+            document.getElementById('console-instructions').style.display = 'block';
+            document.getElementById('results').innerHTML = '<div class="test fail">❌ Cannot run tests from file:// protocol. Please use a local web server.</div>';
+        } else {
+            // Running from a server - proceed with tests
+            import('../src/client/state/app-state.js').then(module => {
+                const { getState, setState, setTimerDuration, setCurrentTimer, resetTimerState, subscribe, getStateObject, initStateManager } = module;
+                
+                const results = document.getElementById('results');
+                let passed = 0;
+                let failed = 0;
+                
+                function test(name, fn) {
+                    const div = document.createElement('div');
+                    div.className = 'test';
+                    try {
+                        fn();
+                        div.classList.add('pass');
+                        div.textContent = '✓ ' + name;
+                        passed++;
+                    } catch (error) {
+                        div.classList.add('fail');
+                        div.textContent = '✗ ' + name + ': ' + error.message;
+                        failed++;
+                    }
+                    results.appendChild(div);
+                }
+                
+                function assert(condition, message) {
+                    if (!condition) throw new Error(message || 'Assertion failed');
+                }
+                
+                function assertEqual(actual, expected, message) {
+                    if (actual !== expected) {
+                        throw new Error(message || `Expected ${expected}, got ${actual}`);
+                    }
+                }
+                
+                // Initialize
+                initStateManager();
+                
+                // Run tests
+                test('State initialized', () => {
+                    assert(getState('timerDuration') !== undefined, 'State should be initialized');
+                });
+                
+                test('Default timer duration is 600', () => {
+                    assertEqual(getState('timerDuration'), 600);
+                });
+                
+                test('Set non-persisted state', () => {
+                    setState('isTimerRunning', true, { persist: false });
+                    assertEqual(getState('isTimerRunning'), true);
+                });
+                
+                test('Set persisted state', () => {
+                    const original = getState('darkMode');
+                    setState('darkMode', true);
+                    assertEqual(getState('darkMode'), true);
+                    assertEqual(localStorage.getItem('bl_darkMode'), 'true');
+                    setState('darkMode', original); // Restore
+                });
+                
+                test('setTimerDuration syncs currentTimer', () => {
+                    const original = getState('timerDuration');
+                    setTimerDuration(900);
+                    assertEqual(getState('timerDuration'), 900);
+                    assertEqual(getState('currentTimer'), 900);
+                    setTimerDuration(original); // Restore
+                });
+                
+                test('State observer works', () => {
+                    let called = false;
+                    const original = getState('darkMode');
+                    const unsub = subscribe('darkMode', () => { called = true; });
+                    setState('darkMode', !original);
+                    assert(called, 'Observer should be called');
+                    setState('darkMode', original); // Restore
+                    unsub();
+                });
+                
+                test('resetTimerState works', () => {
+                    setCurrentTimer(100);
+                    resetTimerState();
+                    assertEqual(getState('currentTimer'), getState('timerDuration'));
+                });
+                
+                test('getStateObject returns copy', () => {
+                    const copy = getStateObject();
+                    const original = getState('timerDuration');
+                    copy.timerDuration = 9999;
+                    assertEqual(getState('timerDuration'), original);
+                });
+                
+                // Summary
+                const summary = document.createElement('div');
+                summary.className = 'test';
+                summary.style.marginTop = '20px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Results: ${passed} passed, ${failed} failed`;
+                if (failed === 0) {
+                    summary.classList.add('pass');
+                } else {
+                    summary.classList.add('fail');
+                }
+                results.appendChild(summary);
+            }).catch(error => {
+                document.getElementById('results').innerHTML = 
+                    '<div class="test fail">❌ Error loading state manager: ' + error.message + '</div>' +
+                    '<p>Make sure you are running this from a web server, not file:// protocol.</p>' +
+                    '<p>Error details: ' + error.stack + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>

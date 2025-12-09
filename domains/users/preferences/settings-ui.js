@@ -1,12 +1,16 @@
 /**
  * Settings modal rendering and logic
+ * 
+ * @typedef {import('../../../src/types/dom.js').DOMElements} DOMElements
  */
 
-import { getDOMElements } from '../utils/dom.js';
-import { openModal, closeModal } from './modal.js';
-import { availableFonts, attachFontDropdown } from '../utils/fonts.js';
-import { showAuthForm, attachAuthListeners } from './auth-ui.js';
-import * as supabaseModule from '../../supabase-config.js';
+import { getDOMElements } from '../../../src/shared/utils/dom-elements.js';
+import { openModal, closeModal } from '../../navigation/modal.js';
+import { availableFonts, attachFontDropdown } from './fonts.js';
+import { showAuthForm, attachAuthListeners } from '../../auth/auth-ui.js';
+import * as supabaseModule from '../../supabase-client.js';
+import { waitForTransition } from '../../../src/shared/utils/transitions.js';
+import { CSS_CLASSES, TRANSITION_TIMEOUTS } from '../../../src/shared/constants.js';
 
 let dom = null;
 
@@ -23,14 +27,13 @@ export function initSettings() {
 /**
  * Handle settings button click
  */
-function handleSettingsClick() {
+async function handleSettingsClick() {
     // Fade out menu content
-    dom.menuContent.classList.add('fade-out');
+    dom.menuContent.classList.add(CSS_CLASSES.FADE_OUT);
 
     // Wait for fade-out animation before showing modal
-    setTimeout(() => {
-        renderSettingsModal();
-    }, 1000); // Wait for fade-out animation to complete
+    await waitForTransition(dom.menuContent, 'opacity', TRANSITION_TIMEOUTS.DEFAULT);
+    renderSettingsModal();
 }
 
 /**
@@ -183,7 +186,7 @@ async function renderAuthenticatedSettings() {
     const user = supabaseModule.currentUser;
 
     const email = user?.email || 'Unknown';
-    const timerMins = profileResult.success ? Math.floor(profileResult.profile.timer_duration / 60) : 10;
+    const timerMins = profileResult.success ? Math.floor(profileResult.data.timer_duration / 60) : 10;
 
     openModal(`
         <h2 class="fade-in-element">Settings</h2>

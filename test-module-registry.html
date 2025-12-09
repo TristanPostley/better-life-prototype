@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Registry Test</title>
+</head>
+<body>
+    <h1>Module Registry Verification Test</h1>
+    <div id="test-results"></div>
+    
+    <script type="module">
+        // Test moduleRegistry functionality
+        import { moduleRegistry } from './src/client/utils/module-registry.js';
+        
+        const results = [];
+        
+        function log(message, status = 'info') {
+            results.push({ message, status, time: Date.now() });
+            console.log(`[${status.toUpperCase()}] ${message}`);
+        }
+        
+        // Test 1: Basic registration and retrieval
+        log('Test 1: Basic registration and retrieval');
+        const testFunction = () => 'test-value';
+        moduleRegistry.register('testFunction', testFunction);
+        
+        const retrieved = moduleRegistry.get('testFunction');
+        if (retrieved === testFunction) {
+            log('✅ Test 1 PASSED: Function registered and retrieved correctly', 'success');
+        } else {
+            log('❌ Test 1 FAILED: Function not retrieved correctly', 'error');
+        }
+        
+        // Test 2: Has method
+        log('Test 2: Has method');
+        if (moduleRegistry.has('testFunction')) {
+            log('✅ Test 2 PASSED: has() returns true for registered dependency', 'success');
+        } else {
+            log('❌ Test 2 FAILED: has() returns false for registered dependency', 'error');
+        }
+        
+        if (!moduleRegistry.has('nonExistent')) {
+            log('✅ Test 2 PASSED: has() returns false for non-existent dependency', 'success');
+        } else {
+            log('❌ Test 2 FAILED: has() returns true for non-existent dependency', 'error');
+        }
+        
+        // Test 3: Async waitFor
+        log('Test 3: Async waitFor');
+        const waitTest = async () => {
+            // Register after a delay
+            setTimeout(() => {
+                moduleRegistry.register('asyncTest', 'async-value');
+            }, 100);
+            
+            // Wait for it
+            const value = await moduleRegistry.waitFor('asyncTest');
+            if (value === 'async-value') {
+                log('✅ Test 3 PASSED: waitFor() correctly waits for dependency', 'success');
+            } else {
+                log('❌ Test 3 FAILED: waitFor() returned wrong value', 'error');
+            }
+        };
+        await waitTest();
+        
+        // Test 4: Immediate waitFor (already registered)
+        log('Test 4: Immediate waitFor (already registered)');
+        moduleRegistry.register('immediateTest', 'immediate-value');
+        const immediateValue = await moduleRegistry.waitFor('immediateTest');
+        if (immediateValue === 'immediate-value') {
+            log('✅ Test 4 PASSED: waitFor() returns immediately for registered dependency', 'success');
+        } else {
+            log('❌ Test 4 FAILED: waitFor() did not return immediately', 'error');
+        }
+        
+        // Test 5: Unregister
+        log('Test 5: Unregister');
+        moduleRegistry.unregister('testFunction');
+        if (!moduleRegistry.has('testFunction')) {
+            log('✅ Test 5 PASSED: unregister() removes dependency', 'success');
+        } else {
+            log('❌ Test 5 FAILED: unregister() did not remove dependency', 'error');
+        }
+        
+        // Test 6: Clear
+        log('Test 6: Clear');
+        moduleRegistry.clear();
+        if (!moduleRegistry.has('asyncTest') && !moduleRegistry.has('immediateTest')) {
+            log('✅ Test 6 PASSED: clear() removes all dependencies', 'success');
+        } else {
+            log('❌ Test 6 FAILED: clear() did not remove all dependencies', 'error');
+        }
+        
+        // Test 7: Multiple waiters
+        log('Test 7: Multiple waiters');
+        const promises = [];
+        for (let i = 0; i < 3; i++) {
+            promises.push(moduleRegistry.waitFor('multiTest'));
+        }
+        
+        setTimeout(() => {
+            moduleRegistry.register('multiTest', 'multi-value');
+        }, 50);
+        
+        const values = await Promise.all(promises);
+        if (values.every(v => v === 'multi-value')) {
+            log('✅ Test 7 PASSED: Multiple waiters all receive value', 'success');
+        } else {
+            log('❌ Test 7 FAILED: Not all waiters received value', 'error');
+        }
+        
+        // Display results
+        const resultsDiv = document.getElementById('test-results');
+        const successCount = results.filter(r => r.status === 'success').length;
+        const failCount = results.filter(r => r.status === 'error').length;
+        
+        resultsDiv.innerHTML = `
+            <h2>Test Results: ${successCount} passed, ${failCount} failed</h2>
+            <ul>
+                ${results.map(r => `
+                    <li style="color: ${r.status === 'success' ? 'green' : r.status === 'error' ? 'red' : 'black'}">
+                        ${r.message}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+        
+        if (failCount === 0) {
+            log('🎉 All tests passed!', 'success');
+        } else {
+            log(`⚠️ ${failCount} test(s) failed`, 'error');
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,153 @@
+# Always On Rules for Better Life Project
+
+## Core Principles
+
+### 1. Follow Existing Domain Structure and Invariants
+
+- **Domain-Driven Organization**: Code is organized by business domain in `src/client/domains/`
+  - Each domain has an `index.js` that exports the public API
+  - Domain-specific utilities go in `utils/` subdirectories within domains
+  - Domain-specific types go in `src/shared/domains/{domain}/types.js`
+
+- **Respect Invariants** (see `ARCHITECTURE.md`):
+  - **DOM Access Invariant**: ALL DOM access MUST go through `getDOMElements()` from `src/client/utils/dom-elements.js`
+  - **State Management Invariant**: State MUST be accessed via `getState()`/`setState()` from state manager
+  - **Module Dependency Invariant**: Use ES6 imports (preferred) or module registry for dynamic dependencies
+  - **Error Handling Invariant**: All errors MUST use `handleError()` from `src/shared/utils/error-handler.js`
+  - **Domain Boundary Invariant**: Domains must be self-contained with minimal cross-domain dependencies
+  - **Client-Server Boundary Invariant**: Client (`src/client/`) MUST NOT import server (`src/server/`)
+  - **File Organization Invariant**: Each domain MUST have an `index.js` public API
+  - **Initialization Invariant**: All modules MUST have idempotent `init*()` functions
+
+### 2. Match Patterns from Similar Files Before Writing Code
+
+- **Before writing new code**, examine similar existing files:
+  - Find files in the same domain or with similar functionality
+  - Match the import patterns, export style, and structure
+  - Follow the same naming conventions (kebab-case for files)
+  - Use the same error handling patterns
+  - Follow the same initialization patterns
+
+- **Example patterns to match**:
+  - Domain index files: `src/client/domains/sessions/index.js` (re-exports public API)
+  - Domain modules: Check similar domain modules for structure
+  - Service files: Match `src/client/services/supabase-client.js` patterns
+  - Utility files: Match patterns in `src/client/utils/` or `src/shared/utils/`
+
+### 3. Verify Imports Against the Repo, Do Not Invent Helpers
+
+- **Before using any import**, verify it exists in the codebase:
+  - Search for the file/function using `grep` or `codebase_search`
+  - Check the actual file to confirm exports match
+  - Verify the import path is correct (relative paths, correct depth)
+  - Do NOT assume helper functions exist - verify them first
+
+- **Import verification checklist**:
+  - Does the file exist at the specified path?
+  - Does it export the named export you're importing?
+  - Is the relative path correct (count directory levels)?
+  - Is it in the correct location (client/shared/server boundary)?
+
+- **Import order** (from `conventions/imports-and-dependencies.md`):
+  1. External dependencies
+  2. Shared utilities and constants
+  3. Type imports (JSDoc typedefs)
+  4. Domain modules
+  5. Local utilities
+
+### 4. Keep Client/Server/Shared Boundaries Intact
+
+- **Client code** (`src/client/`):
+  - Can import: other client code, shared code, external libraries
+  - Cannot import: server code (`src/server/`)
+  - Uses browser APIs: `document`, `window`, `localStorage`, DOM
+
+- **Server code** (`src/server/`):
+  - Can import: shared code, database libraries
+  - Cannot import: client code (`src/client/`)
+  - Currently minimal (only database schema)
+
+- **Shared code** (`src/shared/`):
+  - Can import: other shared code, standard libraries
+  - Cannot import: client code or server code
+  - Must be environment-agnostic (pure functions, types, constants)
+
+- **When in doubt**: Check `conventions/client-server-boundaries.md` and `ARCHITECTURE.md`
+
+### 5. Modify Only What Is Necessary; Avoid Rewriting Whole Files
+
+- **Surgical edits**: Make minimal, targeted changes
+  - Use `search_replace` for specific changes
+  - Only modify the exact lines/functions that need changing
+  - Preserve existing code structure and patterns
+  - Don't reformat or refactor unrelated code
+
+- **When to avoid rewriting**:
+  - Don't rewrite entire files "to be cleaner"
+  - Don't change working code that isn't related to the task
+  - Don't refactor multiple things at once unless explicitly requested
+  - Don't change import styles or patterns unless fixing actual issues
+
+- **Exception**: If the user explicitly requests a rewrite or refactor, then proceed
+
+### 6. Show the List of Files Affected Before Making Changes
+
+- **Before making any code changes**, list all files that will be affected:
+  - Files to be created
+  - Files to be modified
+  - Files to be deleted (if any)
+  - Brief description of what will change in each file
+
+- **Format example**:
+  ```
+  Files to be affected:
+  1. src/client/domains/sessions/timer.js - Add new function `pauseTimer()`
+  2. src/client/domains/sessions/index.js - Export `pauseTimer()`
+  3. src/shared/domains/sessions/types.js - Add `TimerState` type
+  ```
+
+- **Rationale**: This allows the user to review and approve changes before they're made
+
+## Additional Guidelines
+
+### File Naming
+- Use **kebab-case** for all file names: `auth-ui.js`, `timer-service.js`
+- Use descriptive names that indicate purpose
+- Suffixes: `-ui.js` for UI handlers, `-service.js` for service layer, `.test.js` for tests
+
+### Code Style
+- Use **named exports** exclusively (avoid default exports)
+- Use ES6 modules (`import`/`export`)
+- Follow existing error handling patterns with `handleError()` and `withAsyncErrorHandling()`
+- All DOM access through `getDOMElements()` with null checks
+
+### Documentation
+- Check existing documentation in `conventions/` and `ARCHITECTURE.md` before making changes
+- Follow patterns documented in:
+  - `conventions/folder-structure.md` - File organization
+  - `conventions/imports-and-dependencies.md` - Import patterns
+  - `conventions/client-server-boundaries.md` - Boundary rules
+  - `ARCHITECTURE.md` - Overall architecture and invariants
+
+### Testing
+- Tests are in `tests/` directory with `.test.js` suffix
+- Tests are "guardrail" style - focused on invariants
+- Don't modify test files unless fixing or adding tests
+
+## Quick Reference
+
+**Key Files to Check Before Changes:**
+- `ARCHITECTURE.md` - Overall structure and invariants
+- `conventions/folder-structure.md` - File organization rules
+- `conventions/imports-and-dependencies.md` - Import patterns
+- `conventions/client-server-boundaries.md` - Boundary rules
+- Similar files in the same domain - Pattern matching
+
+**Key Directories:**
+- `src/client/domains/` - Domain modules (feature-based)
+- `src/client/services/` - External service clients
+- `src/client/state/` - State management
+- `src/client/utils/` - Client utilities
+- `src/shared/` - Shared code (types, constants, utilities)
+- `src/server/` - Server code (minimal, database schema only)
+

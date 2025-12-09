@@ -1,5 +1,11 @@
 {
+  "name": "better-life",
+  "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0"
+  },
+  "scripts": {
+    "test": "node tests/run-tests.js"
   }
 }

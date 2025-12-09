@@ -1,0 +1,47 @@
+[33mcommit 9c0e496cd28677a086e4c7658c275ed042108062[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: Tristan Postley <tpostley@gmail.com>
+Date:   Fri Dec 5 17:17:43 2025 -0800
+
+    Restructure codebase into domain-oriented architecture
+    
+    - Reorganize code from js/modules to domains/ structure
+    - Group features by business domain (sessions, auth, users, navigation, reflection, shared)
+    - Create domain index.js files as public APIs
+    - Extract utilities and state into shared domain
+    - Update app.js imports to use new domain structure
+
+ ARCHITECTURE.md                          |    0
+ DUPLICATE_ANALYSIS.md                    |  329 [32m++++++++[m
+ app.js                                   | 1288 [32m++++[m[31m--------------------------[m
+ conventions/DOMAIN_STRUCTURE_PROPOSAL.md |    0
+ conventions/DOMAIN_STRUCTURE_TREE.md     |    0
+ conventions/MIGRATION_STATUS.md          |    0
+ conventions/README.md                    |    0
+ conventions/client-server-boundaries.md  |    0
+ conventions/error-handling.md            |    0
+ conventions/folder-structure.md          |    0
+ conventions/imports-and-dependencies.md  |    0
+ conventions/naming-conventions.md        |    0
+ conventions/testing-organization.md      |    0
+ domains/auth/auth-ui.js                  |  246 [32m++++++[m
+ domains/auth/index.js                    |   14 [32m+[m
+ domains/feedback/index.js                |    9 [32m+[m
+ domains/navigation/index.js              |    8 [32m+[m
+ domains/navigation/menu-interactions.js  |  257 [32m++++++[m
+ domains/navigation/modal.js              |   56 [32m++[m
+ domains/navigation/routing.js            |  145 [32m++++[m
+ domains/reflection/index.js              |    6 [32m+[m
+ domains/reflection/questions-ui.js       |  307 [32m+++++++[m
+ domains/sessions/index.js                |   18 [32m+[m
+ domains/sessions/streak.js               |   25 [32m+[m
+ domains/sessions/timer.js                |  159 [32m++++[m
+ domains/shared/index.js                  |    8 [32m+[m
+ domains/shared/state/app-state.js        |   38 [32m+[m
+ domains/shared/utils/dom.js              |   83 [32m++[m
+ domains/shared/utils/time.js             |   15 [32m+[m
+ domains/users/data-migration.js          |   62 [32m++[m
+ domains/users/data-persistence.js        |   34 [32m+[m
+ domains/users/index.js                   |    9 [32m+[m
+ domains/users/preferences/fonts.js       |   72 [32m++[m
+ domains/users/preferences/settings-ui.js |  291 [32m+++++++[m
+ 34 files changed, 2355 insertions(+), 1124 deletions(-)

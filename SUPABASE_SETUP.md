@@ -107,7 +107,7 @@ By default, Supabase uses a rate-limited email service for testing. For producti
 ## Step 7: Test the Application
 
 1. Open your app in a browser (use a local server like Live Server, or serve with `python -m http.server`)
-2. Navigate to the **Finish page** (complete a timer session or use DEBUG FINISH button)
+2. Navigate to the **Menu page** (complete a timer session or use DEBUG MENU button)
 3. Click **Settings** button
 4. You should see **Sign Up** and **Sign In** buttons
 

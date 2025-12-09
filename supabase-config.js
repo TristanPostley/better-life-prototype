@@ -15,11 +15,51 @@
 const SUPABASE_URL = 'https://ftuodzyaxdshogamezvg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0dW9kenlheGRzaG9nYW1lenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2MjkyNTUsImV4cCI6MjA4MDIwNTI1NX0.K8AvAvlzQhOZubO-HpSOquDidpZHaKHHOUIBBnvNch4';
 
-// Import Supabase client
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Initialize Supabase client with error handling
+// Use a placeholder that will be initialized asynchronously
+let supabase = null;
+let supabaseInitialized = false;
 
-// Initialize Supabase client
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create a minimal mock to prevent errors until Supabase loads
+const createMockSupabase = () => ({
+    auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        onAuthStateChange: () => ({ data: { subscription: null } }),
+        signUp: async () => ({ data: null, error: { message: 'Supabase not initialized' } }),
+        signInWithPassword: async () => ({ data: null, error: { message: 'Supabase not initialized' } }),
+        signInWithOAuth: async () => ({ data: null, error: { message: 'Supabase not initialized' } }),
+        signInWithOtp: async () => ({ data: null, error: { message: 'Supabase not initialized' } }),
+        signOut: async () => ({ error: { message: 'Supabase not initialized' } }),
+        resetPasswordForEmail: async () => ({ data: null, error: { message: 'Supabase not initialized' } })
+    },
+    from: () => ({
+        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: { message: 'Supabase not initialized' } }) }) }),
+        insert: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'Supabase not initialized' } }) }) }),
+        update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'Supabase not initialized' } }) }) }) })
+    })
+});
+
+// Initialize with mock first
+supabase = createMockSupabase();
+
+// Don't try to load Supabase during module evaluation
+// Only load it when initAuth is called (lazy loading)
+async function loadSupabaseClient() {
+    if (supabaseInitialized) return; // Already loaded or attempted
+    
+    try {
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseInitialized = true;
+        console.log('Supabase client initialized successfully');
+    } catch (error) {
+        console.error('Failed to load Supabase client (app will continue without it):', error);
+        supabaseInitialized = true; // Mark as attempted so we don't keep trying
+        // Keep using the mock
+    }
+}
+
+export { supabase };
 
 // Global auth state
 export let currentUser = null;
@@ -29,6 +69,9 @@ export let isAuthenticated = false;
  * Initialize authentication state and set up listeners
  */
 export async function initAuth() {
+    // Try to load Supabase client if not already loaded
+    await loadSupabaseClient();
+    
     // Get initial session
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -285,6 +328,29 @@ export async function saveResponse(questionType, responseText) {
         return { success: true, response: data };
     } catch (error) {
         console.error('Save response error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Submit feedback
+ */
+export async function submitFeedback(message) {
+    try {
+        const feedbackData = {
+            message,
+            user_id: isAuthenticated ? currentUser.id : null
+        };
+
+        const { error } = await supabase
+            .from('feedback')
+            .insert(feedbackData);
+
+        if (error) throw error;
+
+        return { success: true, message: 'Feedback sent! Thank you.' };
+    } catch (error) {
+        console.error('Submit feedback error:', error);
         return { success: false, error: error.message };
     }
 }
